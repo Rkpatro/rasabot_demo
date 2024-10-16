@@ -1,14 +1,16 @@
-# Dockerfile for Rasa
+# Rasa Dockerfile
+# Use the official Rasa image
 FROM rasa/rasa:latest-full
 
-# Copy project files
+# Copy any additional files (if you have custom components or code)
 COPY . /app
 
-# Set working directory
+# Set the working directory
 WORKDIR /app
 
-# Expose the default port for Rasa
+
+# Expose the Rasa port
 EXPOSE 5005
 
-# Start Rasa server
-CMD ["run", "--enable-api"]
+# Run Rasa server
+CMD ["run", "--cors", "*", "--enable-api", "--debug"]
