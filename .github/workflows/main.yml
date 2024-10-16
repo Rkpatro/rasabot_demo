@@ -65,7 +65,7 @@ jobs:
     steps:
       - name: Deploy to Server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DOCKER_USERNAME }}@${{ secrets.DOCKER_PASSWORD }} << 'EOF'
+          ssh -tt -o StrictHostKeyChecking=no ${{ secrets.DOCKER_USERNAME }}@${{ secrets.DOCKER_PASSWORD }} << 'EOF'
           docker pull rasa-bot:${{ github.sha }}
           docker stop rasa-container || true
           docker run -d --rm --name rasa-container -p 5005:5005 rasa-bot:${{ github.sha }}
