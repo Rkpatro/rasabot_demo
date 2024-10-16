@@ -63,10 +63,10 @@ jobs:
     needs: build  # Only runs if the build job succeeds
 
     steps:
-      - name: Deploy to Server
-        run: |
-          ssh -tt -o StrictHostKeyChecking=no ${{ secrets.DOCKER_USERNAME }}@${{ secrets.DOCKER_PASSWORD }} << 'EOF'
-          docker pull rasa-bot:${{ github.sha }}
-          docker stop rasa-container || true
-          docker run -d --rm --name rasa-container -p 5005:5005 rasa-bot:${{ github.sha }}
-          EOF
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+      with:
+        context: .  # Context to your Dockerfile location
+        push: true  # Push the image after building
+        tags: roshan450/docker_repo_13oct:latest
+
