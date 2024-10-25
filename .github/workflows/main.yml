@@ -6,7 +6,7 @@ on:
       - main  # Triggers on push to the 'main' branch
 
 jobs:
-  test:
+  Install_rasa:
     runs-on: ubuntu-latest
     
     steps:
@@ -45,7 +45,45 @@ jobs:
         run: |
           source venv/bin/activate
           rasa test core
+  
+  install_postgreSQL:
+  runs-on: ubuntu-latest
 
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: testdb
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+         - name: Install PostgreSQL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql postgresql-contrib
+
+      - name: Start PostgreSQL Service
+        run: |
+          sudo service postgresql start
+
+      - name: Set up PostgreSQL Database and User
+        run: |
+          sudo -u postgres psql -c "ALTER USER postgres PASSWORD '${{ env.POSTGRES_PASSWORD }}';"
+          sudo -u postgres psql -c "CREATE DATABASE ${{ env.POSTGRES_DB }};"
+
+      - name: Test Connection to PostgreSQL
+        run: |
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -c '\conninfo'
+
+      - name: Run SQL Commands
+        run: |
+          # Sample commands to test
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -c 'CREATE TABLE test (id SERIAL PRIMARY KEY, name TEXT);'
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -c "INSERT INTO test (name) VALUES ('sample data');"
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -c 'SELECT * FROM test;'
+      
+    
   build:
     runs-on: ubuntu-latest
     needs: test  # Runs only if tests are successful
@@ -69,4 +107,3 @@ jobs:
         context: .  # Context to your Dockerfile location
         push: true  # Push the image after building
         tags: roshan450/docker_repo_13oct:latest
-
